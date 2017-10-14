@@ -45,6 +45,10 @@ def cors_support(response, *args, **kwargs):
 def options():
     return
 
+@hug.options('/pet', requires=cors_support)
+def options():
+    return
+
 """
 USER ROUTES
 """
@@ -75,16 +79,16 @@ PET ROUTES
 @hug.post('/pet', requires=cors_support)
 def create_pet(body):
     name = body.get('name', None)
-    #post owner to owner redis database
+    #post pet to pet redis database
     pet.set(name, json.dumps(body))
     return body
 
 
 @hug.get('/pet', requires=cors_support)
-def get_pet(body, name: hug.types.text = None):
-    # get owner from user redis database
+def get_pet(name: hug.types.text = None):
+    # get pet from user redis database
     if name is None:
-        # get all owner records
+        # get all pet records
         return pet.keys()
     else:
         return json.loads(pet.get(name))
@@ -106,13 +110,16 @@ def demo_setup():
     }
 
 
-@hug.get('/document', requires=cors_support)
+@hug.post('/document', requires=cors_support)
 def get_document():
     test_document_path = '../docs/rabies_cert.pdf'
 
     with open(test_document_path, "rb") as f:
         encodedZip = base64.b64encode(f.read())
-    return encodedZip.decode()
+    return {
+            'message' : "Successfully transmitted",
+            'base64' : encodedZip.decode()
+    }
 
 
 """
