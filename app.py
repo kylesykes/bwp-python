@@ -112,13 +112,13 @@ def demo_setup():
 
 @hug.post('/document', requires=cors_support)
 def get_document():
-    test_document_path = '../docs/rabies_cert.pdf'
+    test_document_path = 'docs/rabies_cert.pdf'
 
     with open(test_document_path, "rb") as f:
         encodedZip = base64.b64encode(f.read())
     return {
             'message' : "Successfully transmitted",
-            'base64' : encodedZip.decode()
+            'base64' : encodedZip.decode("utf-8") 
     }
 
 
