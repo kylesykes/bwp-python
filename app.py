@@ -35,6 +35,7 @@ def login(user: hug.directives.user, key=super_secret_key):
 def cors_support(response, *args, **kwargs):
     response.set_header('Access-Control-Allow-Origin', '*')
     response.set_header('Access-Control-Allow-Method', 'POST, GET, OPTIONS')
+    response.set_header('Access-Control-Allow-Headers', 'Content-Type')
 
 
 @hug.options('/owner', requires=cors_support)
