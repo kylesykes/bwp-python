@@ -31,7 +31,10 @@ def login(user: hug.directives.user, key=super_secret_key):
     return {"message": "Successfully authenticated with user: {0}".format(user),
             "key" : key}
 
-@hug.post('/owner')
+def cors_support(response, *args, **kwargs):
+    response.set_header('Access-Control-Allow-Origin', '*')
+
+@hug.post('/owner', requires=cors_support)
 def create_owner(body):
     username = body.get('username', None)
     body['role'] = "owner"
@@ -39,7 +42,8 @@ def create_owner(body):
     user.set(username, body)
     return body
 
-@hug.get('/owner')
+
+@hug.get('/owner', requires=cors_support)
 def get_owner(body, username: hug.types.text = None):
     # get owner from user redis database
     if username is None:
@@ -47,6 +51,25 @@ def get_owner(body, username: hug.types.text = None):
         return user.keys()
     else:
         return user.get(username)
+
+
+@hug.post('/pet', requires=cors_support)
+def create_pet(body):
+    username = body.get('username', None)
+    body['role'] = "owner"
+    #post owner to owner redis database
+    pet.set(username, body)
+    return body
+
+
+@hug.get('/pet', requires=cors_support)
+def get_pet(body, username: hug.types.text = None):
+    # get owner from user redis database
+    if username is None:
+        # get all owner records
+        return pet.keys()
+    else:
+        return pet.get(username)
 
 
 if __name__ == '__main__':
