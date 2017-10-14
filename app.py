@@ -72,21 +72,20 @@ PET ROUTES
 
 @hug.post('/pet', requires=cors_support)
 def create_pet(body):
-    username = body.get('username', None)
-    body['role'] = "owner"
+    pet_id = body.get('petID', None)
     #post owner to owner redis database
-    pet.set(username, json.dumps(body))
+    pet.set(pet_id, json.dumps(body))
     return body
 
 
 @hug.get('/pet', requires=cors_support)
-def get_pet(body, username: hug.types.text = None):
+def get_pet(body, petID: hug.types.text = None):
     # get owner from user redis database
-    if username is None:
+    if petID is None:
         # get all owner records
         return pet.keys()
     else:
-        return json.loads(pet.get(username))
+        return json.loads(pet.get(petID))
 
 
 """
