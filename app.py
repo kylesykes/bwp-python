@@ -4,10 +4,10 @@ import os
 import redis
 import json
 
-try:
-    REDIS_URL = redis.from_url(os.environ.get("REDIS_URL"))
-except:
-    REDIS_URL = "redis://h:p5fb02a20cc28b27ca3b002543e7266b49df0ab1273719499c89a26d52f959d60@ec2-34-206-56-227.compute-1.amazonaws.com:52639"
+# try:
+#     REDIS_URL = redis.from_url(os.environ.get("REDIS_URL"))
+# except:
+REDIS_URL = "redis://h:p5fb02a20cc28b27ca3b002543e7266b49df0ab1273719499c89a26d52f959d60@ec2-34-206-56-227.compute-1.amazonaws.com:52639"
 
 demo_logins = {
     'username' : 'shelter',
