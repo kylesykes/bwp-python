@@ -3,7 +3,9 @@ import hug
 import os
 import redis
 import json
-import xmlrpc
+import base64
+from xmlrpc.client import Binary
+
 
 
 # try:
@@ -106,12 +108,11 @@ def demo_setup():
 
 @hug.get('/document', requires=cors_support)
 def get_document():
-    binary_obj = xmlrpclib.Binary( open('foo.pdf').read() )
-    response.set_header('Content-Type', 'application/pdf')
+    test_document_path = '../docs/rabies_cert.pdf'
 
-    test_document_path = 'docs/rabies_cert.pdf'
-    doc = open(test_document_path, 'rb')
-    return doc
+    with open(test_document_path, "rb") as f:
+        encodedZip = base64.b64encode(f.read())
+    return encodedZip.decode()
 
 
 """
