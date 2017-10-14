@@ -49,6 +49,10 @@ def options():
 def options():
     return
 
+@hug.options('/document', requires=cors_support)
+def options():
+    return
+
 """
 USER ROUTES
 """
