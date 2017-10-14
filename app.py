@@ -3,6 +3,7 @@ import hug
 import os
 import redis
 import json
+import xmlrpc
 
 
 # try:
@@ -51,18 +52,19 @@ def create_owner(body):
     username = body.get('username', None)
     body['role'] = "owner"
     #post owner to owner redis database
-    user.set(username, body)
+    user.set(username, json.dumps(body))
     return body
 
 
 @hug.get('/owner', requires=cors_support)
-def get_owner(body, username: hug.types.text = None):
+def get_owner(username: hug.types.text = None):
     # get owner from user redis database
     if username is None:
-        # get all owner records
+        # get all user record keys
         return user.keys()
     else:
-        return user.get(username)
+        # return user record
+        return json.loads(user.get(username))
 
 """
 PET ROUTES
@@ -73,7 +75,7 @@ def create_pet(body):
     username = body.get('username', None)
     body['role'] = "owner"
     #post owner to owner redis database
-    pet.set(username, body)
+    pet.set(username, json.dumps(body))
     return body
 
 
@@ -84,7 +86,49 @@ def get_pet(body, username: hug.types.text = None):
         # get all owner records
         return pet.keys()
     else:
-        return pet.get(username)
+        return json.loads(pet.get(username))
+
+
+"""
+CREATE KENNEL USER
+"""
+@hug.post('/demo_setup', requires=cors_support)
+def demo_setup():
+    demo_user = {
+        'username' : 'shelter',
+        'password' : '1234',
+        'firstName' : 'Jane',
+        'lastName' : 'Goodall',
+        'email' : 'jane@purina.com',
+        'phoneNumber' : '314-123-4567',
+        'role' : 'user'
+    }
+
+
+@hug.get('/document', requires=cors_support)
+def get_document():
+    binary_obj = xmlrpclib.Binary( open('foo.pdf').read() )
+    response.set_header('Content-Type', 'application/pdf')
+
+    test_document_path = 'docs/rabies_cert.pdf'
+    doc = open(test_document_path, 'rb')
+    return doc
+
+
+"""
+CLEAR REDIS DATABASE
+"""
+
+@hug.post('/clear_redis', requires=cors_support)
+def clear_redis():
+    try:
+        # clear owner db
+        user.flushdb()
+        # clear pet db
+        pet.flushdb()
+        return True
+    except:
+        return False
 
 
 if __name__ == '__main__':
