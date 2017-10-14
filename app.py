@@ -4,6 +4,7 @@ import os
 import redis
 import json
 
+
 # try:
 #     REDIS_URL = redis.from_url(os.environ.get("REDIS_URL"))
 # except:
@@ -33,6 +34,16 @@ def login(user: hug.directives.user, key=super_secret_key):
 
 def cors_support(response, *args, **kwargs):
     response.set_header('Access-Control-Allow-Origin', '*')
+    response.set_header('Access-Control-Allow-Method', 'POST, GET, OPTIONS')
+
+
+@hug.options('/owner', requires=cors_support)
+def options():
+    return
+
+"""
+USER ROUTES
+"""
 
 @hug.post('/owner', requires=cors_support)
 def create_owner(body):
@@ -52,6 +63,9 @@ def get_owner(body, username: hug.types.text = None):
     else:
         return user.get(username)
 
+"""
+PET ROUTES
+"""
 
 @hug.post('/pet', requires=cors_support)
 def create_pet(body):
