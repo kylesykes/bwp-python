@@ -98,7 +98,7 @@ def create_owner(body):
     return body
 
 def get_owner_keys():
-    owners = [Id.decode("utf-8") for Id in user.keys() if 'doc:' not in Id.decode("utf-8")]
+    owners = [Id.decode("utf-8") for Id in user.keys() if 'owner' in Id.decode("utf-8")]
     return owners
 
 
@@ -345,7 +345,7 @@ CREATE DEMO STUFF
 @hug.get('/demo_setup', requires=cors_support)
 def demo_setup():
     demo_user = {
-        'username' : 'shelter',
+        'username' : 'jane',
         'password' : '1234',
         'firstName' : 'Jane',
         'lastName' : 'Goodall',
@@ -354,10 +354,30 @@ def demo_setup():
         'role' : 'user'
     }
 
+    user.set('user:{}:{}:{}'.format(demo_user['firstName'],
+                                    demo_user['lastName'],
+                                    demo_user['username']),
+                json.dumps(demo_user))
+
+    demo_owner = {
+        'username' : 'frank',
+        'password' : '1234',
+        'firstName' : 'Frank',
+        'lastName' : 'Parks',
+        'email' : 'frank@ilovepets.com',
+        'phoneNumber' : '314-555-5555',
+        'role' : 'owner'
+    }
+
+    user.set('user:{}:{}:{}'.format(demo_owner['firstName'],
+                                    demo_owner['lastName'],
+                                    demo_owner['username']),
+                json.dumps(demo_owner))
+
     # clear owner db
-    # user.flushdb()
+    user.flushdb()
     # # clear pet db
-    # pet.flushdb()
+    pet.flushdb()
 
     #add encoded_documents to redis
     doc_filenames = os.listdir('docs')
