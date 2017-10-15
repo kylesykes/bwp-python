@@ -286,7 +286,7 @@ DOCUMENTS
 """
 
 def get_document_ids():
-    filenames = [filename for filename in os.listdir('docs') if '.txt' in filename]
+    filenames = [filename for filename in os.listdir('docs') if ('.txt' in filename) and ('1' not in filename) and ('3' not in filename)]
 
     document_ids = [filename.split('.')[1] for filename in filenames]
 
@@ -348,7 +348,7 @@ def get_image_for_breed(pet_id: hug.types.text):
 CREATE DEMO STUFF
 """
 @hug.get('/demo_setup', requires=cors_support)
-def demo_setup():
+def demo_setup(response):
     # clear owner db
     user.flushdb()
     # # clear pet db
@@ -366,7 +366,7 @@ def demo_setup():
         'role' : 'user'
     }
 
-    create_owner(demo_user)
+    create_owner(demo_user, response)
 
     demo_owner = {
         'username' : 'frank',
@@ -378,7 +378,35 @@ def demo_setup():
         'phoneNumber' : '314-555-5555'
     }
 
-    create_owner(demo_owner)
+    create_owner(demo_owner, response)
+
+    demo_pet1 = {
+        'name' : 'Fluffles',
+        'breed' : 'Poodle',
+        'chipped' : '123-456-789',
+        'age' : '5',
+        'howCheckedIn' : 'Rescued'
+    }
+
+    demo_pet2 = {
+        'name' : 'Max',
+        'breed' : 'Labrador Retriever',
+        'chipped' : '999-446-729',
+        'age' : '10',
+        'howCheckedIn' : 'Rescued'
+    }
+
+    demo_pet3 = {
+        'name' : 'Irene',
+        'breed' : 'Miniature Schnauzer',
+        'chipped' : '631-643-240',
+        'age' : '3',
+        'howCheckedIn' : 'Rescued'
+    }
+
+    create_pet(demo_pet1)
+    create_pet(demo_pet2)
+    create_pet(demo_pet3)
 
     #add encoded_documents to redis
     doc_filenames = os.listdir('docs')
@@ -408,7 +436,7 @@ def demo_setup():
     for folder in folders:
         try:
             filenames = os.listdir('images/{}'.format(folder))
-            filenames = [filename for filename in filenames if 'DS' not in filename]
+            filenames = [filename for filename in filenames if ('DS' not in filename) or ('1' not in filename) or ('3' not in filename)]
             for filename in filenames:
                 file_paths.append('{}/{}'.format(folder, filename))
         except:
