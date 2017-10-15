@@ -246,8 +246,10 @@ DOCUMENTS
 """
 
 def get_document_ids():
-    user_keys = user.keys()
-    document_ids = [Id.decode("utf-8") for Id in user_keys if 'doc:' in Id.decode("utf-8")]
+    filenames = [filename for filename in os.listdir('docs') if '.txt' in filename]
+
+    document_ids = [filename.split('.')[1] for filename in filenames]
+
     return document_ids
 
 @hug.get('/document', requires=cors_support)
@@ -255,17 +257,31 @@ def get_document(document_id: hug.types.text = None):
     if document_id is None:
         return get_document_ids()
     else:
-        encoded_document = user.get(document_id)
-        return encoded_document
+        number = document_id
+        lookup = {
+            '0' : 'Adoption Agreement.0.txt',
+            '1' : 'Cat Vaccine Schedule.1.txt',
+            '2' : 'Dog and Cat Safety.2.txt',
+            '3' : 'Dog Vaccine Schedule.3.txt',
+            '4' : 'Microchipping Importance.4.txt',
+            '5' : 'Proof of Vaccination.5.txt',
+            '6' : 'Rabies Certificate.6.txt'
+        }
+        filename = lookup[document_id]
+        with open('docs/{}'.format(filename), 'r') as r:
+            data = json.loads(r.read())
+        return data
 
 
 """
 IMAGES
 """
 
-# @hug.get('/image.png', output=hug.output_format.png_image)
-# def get_image_for_breed():
-#     return '../artwork/logo.png'
+@hug.get('/image', output=hug.output_format.png_image)
+def get_random_image_for_breed(breed: hug.types.text):
+    
+    
+    return '../artwork/logo.png'
 
 """
 CREATE DEMO STUFF
@@ -283,15 +299,45 @@ def demo_setup():
     }
 
     # clear owner db
-    user.flushdb()
-    # clear pet db
-    pet.flushdb()
+    # user.flushdb()
+    # # clear pet db
+    # pet.flushdb()
 
     #add encoded_documents to redis
-    with open('docs/encoded_documents.txt', 'r') as r:
-        encoded_doc_list = json.loads(r.read())
-    for i, encoded_doc in enumerate(encoded_doc_list):
-        user.set('doc:{}'.format(i), encoded_doc)
+    doc_filenames = os.listdir('docs')
+    doc_filenames = [filename for filename in doc_filenames if '.pdf' in filename]
+
+    encoded_doc_list = []
+
+    for i, doc_file in enumerate(doc_filenames):
+        with open('docs/{}'.format(doc_file), "rb") as f:
+            encodedZip = base64.b64encode(f.read())
+
+        title = doc_file.split('.')[0]
+        decoded = encodedZip.decode('utf-8')
+        data = {
+            'title' : title,
+            'base64' : decoded
+        }
+
+        with open('docs/{}.{}.txt'.format(title, i), 'w') as f:
+            f.write(json.dumps(data))
+
+
+    #add images webapp paths to redis
+    file_paths = []
+    folders = os.listdir('images')
+
+    for folder in folders:
+        filenames = os.listdir('images/{}'.format(folder))
+        for filename in filenames:
+            file_paths.append('{}/{}'.format(folder, filename))
+
+    formatted_image_keys = ['{}:{}'.format(x.split('/')[0], x.split('/')[1][0]) for x in file_paths]
+    zipped = zip(formatted_image_keys, file_paths)
+    
+    for image in zipped:
+        user.set('image:{}'.format(image[0]), image[1])
 
     return {'message' : "Success"}
 
