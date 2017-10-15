@@ -92,10 +92,11 @@ def create_owner(body, response):
     username = body.get('username', None)
     if body.get('role', None) is None:
         body['role'] = "owner"
+    role = body['role']
     first_name = body.get('firstName', '')
     last_name = body.get('lastName', '')
     body['adopted_pets'] = []
-    body['owner_id'] = 'owner:{}:{}:{}'.format(first_name, last_name, username)
+    body['owner_id'] = '{}:{}:{}:{}'.format(role, first_name, last_name, username)
     #post owner to owner redis database
     user.set(body['owner_id'], json.dumps(body))
     
@@ -380,21 +381,21 @@ def demo_setup(response):
 
     create_owner(demo_owner, response)
 
-    demo_pet1 = {
-        'name' : 'Fluffles',
-        'breed' : 'Poodle',
-        'chipped' : '123-456-789',
-        'age' : '5',
-        'howCheckedIn' : 'Rescued'
-    }
+    # demo_pet1 = {
+    #     'name' : 'Fluffles',
+    #     'breed' : 'Poodle',
+    #     'chipped' : '123-456-789',
+    #     'age' : '5',
+    #     'howCheckedIn' : 'Rescued'
+    # }
 
-    demo_pet2 = {
-        'name' : 'Max',
-        'breed' : 'Labrador Retriever',
-        'chipped' : '999-446-729',
-        'age' : '10',
-        'howCheckedIn' : 'Rescued'
-    }
+    # demo_pet2 = {
+    #     'name' : 'Max',
+    #     'breed' : 'Labrador Retriever',
+    #     'chipped' : '999-446-729',
+    #     'age' : '10',
+    #     'howCheckedIn' : 'Rescued'
+    # }
 
     demo_pet3 = {
         'name' : 'Irene',
@@ -404,8 +405,8 @@ def demo_setup(response):
         'howCheckedIn' : 'Rescued'
     }
 
-    create_pet(demo_pet1)
-    create_pet(demo_pet2)
+    # create_pet(demo_pet1)
+    # create_pet(demo_pet2)
     create_pet(demo_pet3)
 
     #add encoded_documents to redis
