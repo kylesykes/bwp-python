@@ -216,12 +216,18 @@ def add_reminder(body):
     pet.set(pet_id, json.dumps(pet_object))
     return pet_object
 
+
 @hug.get('/reminder', requires=cors_support)
-def get_reminder(reminder_id: hug.types.text = None):
+def get_reminder(reminder_id: hug.types.text = None, pet_id: hug.types.text = None):
     if reminder_id is None:
-        # get all reminder_ids
-        reminder_ids = get_keys(key_type='reminder')
-        return reminder_ids
+        if pet_id is None:
+            # get all reminder_ids
+            reminder_ids = get_keys(key_type='reminder')
+            return reminder_ids
+        else:
+            # get all reminders for pet_id
+            pet_object = json.loads(pet.get(pet_id))
+            return pet_object.get('reminders', [])
     else:
         # get specific reminder_id object
         reminder_object = user.get(reminder_id)
