@@ -316,10 +316,13 @@ def get_random_image_path_for_breed(breed):
     else:
         return 'images/quokka.jpg'
 
-@hug.get('/image_for_pet', output=hug.output_format.png_image)
+@hug.get('/image_for_pet')
 def get_image_for_breed(pet_id: hug.types.text):
     pet_object = json.loads(pet.get(pet_id))
-    return pet_object['image']
+    with open(pet_object['image'], 'rb') as r:
+        encoded_img = base64.b64encode(r.read())
+    return encoded_img.decode('utf-8')
+    
 
 """
 CREATE DEMO STUFF
