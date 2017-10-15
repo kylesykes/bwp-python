@@ -7,6 +7,8 @@ import base64
 from xmlrpc.client import Binary
 import uuid
 import random
+from datetime import datetime
+from datetime import timedelta
 
 
 
@@ -136,7 +138,20 @@ def create_pet(body):
     temp_key = '{}:{}'.format(pet_name, pet_uuid)
     
     body['adopted'] = False
-    body['reminders'] = []
+    static_reminders = [
+        {
+            'pet_id' : temp_key,
+            'description' : 'Rabies shot due',
+            'timestamp' : str(datetime.now() + timedelta(days=4))
+        },
+        {
+            'pet_id' : temp_key,
+            'description' : 'Vet checkup',
+            'timestamp' : str(datetime.now() + timedelta(days=30))
+        }
+    ]
+    
+    body['reminders'] = static_reminders
 
     #put doc_ids on pet
     body['documents'] = get_document_ids()
