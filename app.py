@@ -344,6 +344,12 @@ CREATE DEMO STUFF
 """
 @hug.get('/demo_setup', requires=cors_support)
 def demo_setup():
+    # clear owner db
+    user.flushdb()
+    # # clear pet db
+    pet.flushdb()
+
+
     demo_user = {
         'username' : 'jane',
         'password' : '1234',
@@ -373,11 +379,6 @@ def demo_setup():
                                     demo_owner['lastName'],
                                     demo_owner['username']),
                 json.dumps(demo_owner))
-
-    # clear owner db
-    user.flushdb()
-    # # clear pet db
-    pet.flushdb()
 
     #add encoded_documents to redis
     doc_filenames = os.listdir('docs')
