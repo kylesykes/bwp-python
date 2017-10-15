@@ -49,10 +49,19 @@ def cors_support(response, *args, **kwargs):
 
 
 @hug.options('/link', requires=cors_support)
+def options_link():
+    return
+
 @hug.options('/document', requires=cors_support)
+def options_document():
+    return
+
 @hug.options('/pet', requires=cors_support)
+def options_pet():
+    return
+
 @hug.options('/owner', requires=cors_support)
-def options():
+def options_owner():
     return
 
 """
