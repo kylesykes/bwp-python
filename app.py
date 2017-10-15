@@ -119,6 +119,7 @@ def get_pet(pet_id: hug.types.text = None):
 LINKING ROUTES
 """
 
+@hug.options('/link', requires=cors_support)
 @hug.post('/link', requires=cors_support)
 def link_owner_pet(body):
     pet_id = body['pet_id']
