@@ -48,19 +48,10 @@ def cors_support(response, *args, **kwargs):
     response.set_header('Access-Control-Allow-Headers', 'Content-Type')
 
 
-@hug.options('/owner', requires=cors_support)
-def options():
-    return
-
-@hug.options('/pet', requires=cors_support)
-def options():
-    return
-
-@hug.options('/document', requires=cors_support)
-def options():
-    return
-
 @hug.options('/link', requires=cors_support)
+@hug.options('/document', requires=cors_support)
+@hug.options('/pet', requires=cors_support)
+@hug.options('/owner', requires=cors_support)
 def options():
     return
 
