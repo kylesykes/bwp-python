@@ -77,9 +77,13 @@ def create_owner(body):
         return {"message" : "Bad person, you need a username"}
     username = body.get('username', None)
     body['role'] = "owner"
+    first_name = body.get('firstName', '')
+    last_name = body.get('lastName', '')
     body['adopted_pets'] = []
+    body['owner_id'] = 'owner:{}:{}:{}'.format(first_name, last_name, username)
     #post owner to owner redis database
-    user.set(username, json.dumps(body))
+    user.set(body['owner_id'], json.dumps(body))
+    
     return body
 
 
@@ -88,7 +92,8 @@ def get_owner(username: hug.types.text = None):
     # get owner from user redis database
     if username is None:
         # get all user record keys
-        return user.keys()
+        owners = [Id for Id in user.keys() if 'doc:' not in str(Id)]
+        return owners
     else:
         # return user record
         return json.loads(user.get(username))
@@ -104,11 +109,14 @@ def create_pet(body):
     temp_key = '{}:{}'.format(pet_name, pet_uuid)
     
     body['adopted'] = False
-    
+
+    #put doc_ids on pet
+    body['documents'] = get_document_ids()
+    body['pet_id'] = pet_uuid
+
     #post pet to pet redis database
     pet.set(temp_key, json.dumps(body))
-    # add id to response
-    body['pet_id'] = pet_uuid
+
     return body
 
 
@@ -163,26 +171,45 @@ def get_breed_list():
     return breed_list
 
 
+@hug.get('/adopted_pet_numbers', requires=cors_support)
+def adopted_pet_numbers():
+    pets_adopted = []
+    pet_ids = pet.keys()
+    
+    for pet_id in pet_ids:
+        pet_object = json.loads(pet.get(pet_id))
+        if pet_object['adopted'] == True:
+            pets_adopted.append(pet_id)
+    
+    payload = {
+        'total' : len(pet_ids),
+        'adopted' : len(pets_adopted)
+    }
+    return payload
+
+
 """
 DOCUMENTS
 """
 
-@hug.post('/document', requires=cors_support)
-def get_document():
-    test_document_path = 'docs/rabies_cert.pdf'
+def get_document_ids():
+    user_keys = user.keys()
+    document_ids = [str(Id) for Id in user_keys if 'doc:' in str(Id)]
+    return document_ids
 
-    with open(test_document_path, "rb") as f:
-        encodedZip = base64.b64encode(f.read())
-    return {
-            'message' : "Successfully transmitted",
-            'base64' : encodedZip.decode("utf-8") 
-    }
+@hug.get('/document', requires=cors_support)
+def get_document(document_id: hug.types.text = None):
+    if document_id is None:
+        return get_document_ids()
+    else:
+        encoded_document = user.get(document_id)
+        return encoded_document
 
 
 """
 CREATE DEMO STUFF
 """
-@hug.post('/demo_setup', requires=cors_support)
+@hug.get('/demo_setup', requires=cors_support)
 def demo_setup():
     demo_user = {
         'username' : 'shelter',
@@ -194,6 +221,18 @@ def demo_setup():
         'role' : 'user'
     }
 
+    # clear owner db
+    user.flushdb()
+    # clear pet db
+    pet.flushdb()
+
+    #add encoded_documents to redis
+    with open('docs/encoded_documents.txt', 'r') as r:
+        encoded_doc_list = json.loads(r.read())
+    for i, encoded_doc in enumerate(encoded_doc_list):
+        user.set(str('doc:{}'.format(i)), encoded_doc)
+
+    return {'message' : "Success"}
 
 
 
