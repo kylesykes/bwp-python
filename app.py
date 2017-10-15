@@ -367,9 +367,13 @@ def demo_setup():
     folders = os.listdir('images')
 
     for folder in folders:
-        filenames = os.listdir('images/{}'.format(folder))
-        for filename in filenames:
-            file_paths.append('{}/{}'.format(folder, filename))
+        try:
+            filenames = os.listdir('images/{}'.format(folder))
+            filenames = [filename for filename in filenames if 'DS' not in filename]
+            for filename in filenames:
+                file_paths.append('{}/{}'.format(folder, filename))
+        except:
+            pass
 
     formatted_image_keys = ['{}:{}'.format(x.split('/')[0], x.split('/')[1][0]) for x in file_paths]
     zipped = zip(formatted_image_keys, file_paths)
