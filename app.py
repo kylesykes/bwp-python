@@ -8,7 +8,9 @@ from xmlrpc.client import Binary
 import uuid
 import random
 from datetime import datetime
-from datetime import timedelta
+from datetime import timedelta\
+
+from falcon import HTTP_400
 
 
 
@@ -83,11 +85,13 @@ def options_image_for_pet():
 USER ROUTES
 """
 @hug.post('/owner', requires=cors_support)
-def create_owner(body):
+def create_owner(body, response):
     if body.get('username', None) is None:
+        response.status = HTTP_400
         return {"message" : "Bad person, you need a username"}
     username = body.get('username', None)
-    body['role'] = "owner"
+    if body.get('role', None) is None:
+        body['role'] = "owner"
     first_name = body.get('firstName', '')
     last_name = body.get('lastName', '')
     body['adopted_pets'] = []
@@ -114,7 +118,7 @@ def get_owner(owner_id: hug.types.text = None):
 
 
 @hug.get('/owner_by_username', requires=cors_support)
-def get_owner_by_username(username: hug.types.text = None):
+def get_owner_by_username(response, username: hug.types.text = None):
     owner_keys = get_owner_keys()
     username_keys = [key for key in owner_keys if username in key]
     if len(username_keys) == 1:
@@ -122,6 +126,7 @@ def get_owner_by_username(username: hug.types.text = None):
         return json.loads(user.get(username_key))
         # return username_key
     elif len(username_keys) == 0:
+        response.status = HTTP_400
         return {
             "message": "No key with username exists or multiple people with same username."
         }
@@ -295,9 +300,9 @@ def get_document(document_id: hug.types.text = None):
         number = document_id
         lookup = {
             '0' : 'Adoption Agreement.0.txt',
-            '1' : 'Cat Vaccine Schedule.1.txt',
+            # '1' : 'Cat Vaccine Schedule.1.txt',
             '2' : 'Dog and Cat Safety.2.txt',
-            '3' : 'Dog Vaccine Schedule.3.txt',
+            # '3' : 'Dog Vaccine Schedule.3.txt',
             '4' : 'Microchipping Importance.4.txt',
             '5' : 'Proof of Vaccination.5.txt',
             '6' : 'Rabies Certificate.6.txt'
@@ -357,13 +362,11 @@ def demo_setup():
         'lastName' : 'Goodall',
         'email' : 'jane@purina.com',
         'phoneNumber' : '314-123-4567',
+        'address' : '1 Purina Drive, St. Louis MO',
         'role' : 'user'
     }
 
-    user.set('user:{}:{}:{}'.format(demo_user['firstName'],
-                                    demo_user['lastName'],
-                                    demo_user['username']),
-                json.dumps(demo_user))
+    create_owner(demo_user)
 
     demo_owner = {
         'username' : 'frank',
@@ -371,14 +374,11 @@ def demo_setup():
         'firstName' : 'Frank',
         'lastName' : 'Parks',
         'email' : 'frank@ilovepets.com',
-        'phoneNumber' : '314-555-5555',
-        'role' : 'owner'
+        'address' : '5 Sunny Lane, St. Louis MO',
+        'phoneNumber' : '314-555-5555'
     }
 
-    user.set('owner:{}:{}:{}'.format(demo_owner['firstName'],
-                                    demo_owner['lastName'],
-                                    demo_owner['username']),
-                json.dumps(demo_owner))
+    create_owner(demo_owner)
 
     #add encoded_documents to redis
     doc_filenames = os.listdir('docs')
