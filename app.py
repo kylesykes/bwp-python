@@ -64,6 +64,10 @@ def options_pet():
 def options_owner():
     return
 
+@hug.options('/breeds', requires=cors_support)
+def options_breeds():
+    return
+
 """
 USER ROUTES
 """
@@ -152,7 +156,11 @@ def link_owner_pet(body):
 QUERIES
 """
 
-
+@hug.get('/breeds', requires=cors_support)
+def get_breed_list():
+    with open('data/breed_list.txt', 'r') as r:
+        breed_list = json.loads(r.read())
+    return breed_list
 
 
 """
