@@ -136,6 +136,7 @@ def create_pet(body):
     temp_key = '{}:{}'.format(pet_name, pet_uuid)
     
     body['adopted'] = False
+    body['reminders'] = []
 
     #put doc_ids on pet
     body['documents'] = get_document_ids()
@@ -205,9 +206,15 @@ def get_reminder_keys():
 @hug.post('/reminder', requires=cors_support)
 def add_reminder(body):
     reminder_id = get_uuid()
+    pet_id = body['pet_id']
+    # create reminder, get ID
     body['reminder_id'] = 'reminder:{}'.format(reminder_id)
     user.set(body['reminder_id'], json.dumps(body))
-    return body
+    # add to pet
+    pet_object = json.loads(pet.get(pet_id))
+    pet_object['reminders'] .append(body)
+    pet.set(pet_id, json.dumps(pet_object))
+    return pet_object
 
 @hug.get('/reminder', requires=cors_support)
 def get_reminder(reminder_id: hug.types.text = None):
