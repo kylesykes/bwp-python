@@ -86,17 +86,35 @@ def create_owner(body):
     
     return body
 
+def get_owner_keys():
+    owners = [Id.decode("utf-8") for Id in user.keys() if 'doc:' not in Id.decode("utf-8")]
+    return owners
+
 
 @hug.get('/owner', requires=cors_support)
-def get_owner(username: hug.types.text = None):
+def get_owner(owner_id: hug.types.text = None):
     # get owner from user redis database
-    if username is None:
+    if owner_id is None:
         # get all user record keys
-        owners = [Id for Id in user.keys() if 'doc:' not in str(Id)]
-        return owners
+        return get_owner_keys()
     else:
         # return user record
-        return json.loads(user.get(username))
+        return json.loads(user.get(owner_id))
+
+
+@hug.get('/owner_by_username', requires=cors_support)
+def get_owner_by_username(username: hug.types.text = None):
+    owner_keys = get_owner_keys()
+    username_keys = [key for key in owner_keys if username in key]
+    if len(username_keys) == 1:
+        username_key = username_keys[0]
+        return json.loads(user.get(username_key))
+        # return username_key
+    elif len(username_keys) == 0:
+        return {
+            "message": "No key with username exists or multiple people with same username."
+        }
+
 
 """
 PET ROUTES
@@ -137,7 +155,7 @@ LINKING ROUTES
 @hug.post('/link', requires=cors_support)
 def link_owner_pet(body):
     pet_id = body['pet_id']
-    owner_id = body['owner_username']
+    owner_id = body['owner_id']
 
     #get and alter owner dict
     owner_object = json.loads(user.get(owner_id))
@@ -194,7 +212,7 @@ DOCUMENTS
 
 def get_document_ids():
     user_keys = user.keys()
-    document_ids = [str(Id) for Id in user_keys if 'doc:' in str(Id)]
+    document_ids = [Id.decode("utf-8") for Id in user_keys if 'doc:' in Id.decode("utf-8")]
     return document_ids
 
 @hug.get('/document', requires=cors_support)
@@ -230,7 +248,7 @@ def demo_setup():
     with open('docs/encoded_documents.txt', 'r') as r:
         encoded_doc_list = json.loads(r.read())
     for i, encoded_doc in enumerate(encoded_doc_list):
-        user.set(str('doc:{}'.format(i)), encoded_doc)
+        user.set('doc:{}'.format(i), encoded_doc)
 
     return {'message' : "Success"}
 
