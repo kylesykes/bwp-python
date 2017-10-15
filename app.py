@@ -68,6 +68,10 @@ def options_owner():
 def options_breeds():
     return
 
+@hug.options('/reminder', requires=cors_support)
+def options_reminder():
+    return
+
 """
 USER ROUTES
 """
@@ -179,6 +183,37 @@ def link_owner_pet(body):
 
 
 """
+REMINDER ROUTES
+"""
+def get_keys(key_type):
+    keys = [Id.decode("utf-8") for Id in user.keys() if '{}:'.format(key_type) in Id.decode("utf-8")]
+    return keys
+
+
+def get_reminder_keys():
+    reminders = [Id.decode("utf-8") for Id in user.keys() if 'reminder:' in Id.decode("utf-8")]
+    return reminders
+
+
+@hug.post('/reminder', requires=cors_support)
+def add_reminder(body):
+    reminder_id = get_uuid()
+    body['reminder_id'] = 'reminder:{}'.format(reminder_id)
+    user.set(body['reminder_id'], json.dumps(body))
+    return body
+
+@hug.get('/reminder', requires=cors_support)
+def get_reminder(reminder_id: hug.types.text = None):
+    if reminder_id is None:
+        # get all reminder_ids
+        reminder_ids = get_keys(key_type='reminder')
+        return reminder_ids
+    else:
+        # get specific reminder_id object
+        reminder_object = user.get(reminder_id)
+        return json.loads(reminder_object)
+
+"""
 QUERIES
 """
 
@@ -223,6 +258,14 @@ def get_document(document_id: hug.types.text = None):
         encoded_document = user.get(document_id)
         return encoded_document
 
+
+"""
+IMAGES
+"""
+
+# @hug.get('/image.png', output=hug.output_format.png_image)
+# def get_image_for_breed():
+#     return '../artwork/logo.png'
 
 """
 CREATE DEMO STUFF
