@@ -94,7 +94,7 @@ PET ROUTES
 def create_pet(body):
     pet_uuid = get_uuid()
     pet_name = body.get('name', None)
-    temp_key = '{}:{}'.format(pet_name, 'test')
+    temp_key = '{}:{}'.format(pet_name, pet_uuid)
     
     body['adopted'] = False
     
@@ -144,6 +144,13 @@ def link_owner_pet(body):
             'owner': owner_object,
             'pet' : pet_object
     }
+
+
+"""
+QUERIES
+"""
+
+@hug.get('/')
 
 
 """
