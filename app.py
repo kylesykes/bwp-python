@@ -150,8 +150,6 @@ def link_owner_pet(body):
 QUERIES
 """
 
-@hug.get('/')
-
 
 """
 DOCUMENTS
