@@ -6,6 +6,7 @@ import json
 import base64
 from xmlrpc.client import Binary
 import uuid
+import random
 
 
 
@@ -72,6 +73,10 @@ def options_breeds():
 def options_reminder():
     return
 
+@hug.options('/image_for_pet', requires=cors_support)
+def options_image_for_pet():
+    return
+
 """
 USER ROUTES
 """
@@ -134,7 +139,9 @@ def create_pet(body):
 
     #put doc_ids on pet
     body['documents'] = get_document_ids()
-    body['pet_id'] = pet_uuid
+    body['pet_id'] = temp_key
+    breed = body.get('breed', None)
+    body['image'] = get_random_image_path_for_breed(breed)
 
     #post pet to pet redis database
     pet.set(temp_key, json.dumps(body))
@@ -277,11 +284,29 @@ def get_document(document_id: hug.types.text = None):
 IMAGES
 """
 
-@hug.get('/image', output=hug.output_format.png_image)
-def get_random_image_for_breed(breed: hug.types.text):
-    
-    
-    return '../artwork/logo.png'
+def get_random_image_path_for_breed(breed):
+    if breed == 'Poodle':
+        path = 'images/poodle'
+        filenames = os.listdir(path)
+        random_file = random.choice(filenames)
+        return '{}/{}'.format(path, random_file)
+    elif breed == 'Miniature Schnauzer':
+        path = 'images/miniature_schnauzer'
+        filenames = os.listdir(path)
+        random_file = random.choice(filenames)
+        return '{}/{}'.format(path, random_file)
+    elif breed == 'Labrador Retriever':
+        path = 'images/labrador'
+        filenames = os.listdir(path)
+        random_file = random.choice(filenames)
+        return '{}/{}'.format(path, random_file)
+    else:
+        return 'images/quokka.jpg'
+
+@hug.get('/image_for_pet', output=hug.output_format.png_image)
+def get_image_for_breed(pet_id: hug.types.text):
+    pet_object = json.loads(pet.get(pet_id))
+    return pet_object['image']
 
 """
 CREATE DEMO STUFF
