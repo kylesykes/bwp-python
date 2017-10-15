@@ -369,7 +369,7 @@ def demo_setup():
         'role' : 'owner'
     }
 
-    user.set('user:{}:{}:{}'.format(demo_owner['firstName'],
+    user.set('owner:{}:{}:{}'.format(demo_owner['firstName'],
                                     demo_owner['lastName'],
                                     demo_owner['username']),
                 json.dumps(demo_owner))
