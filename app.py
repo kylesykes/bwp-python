@@ -47,23 +47,10 @@ def cors_support(response, *args, **kwargs):
     response.set_header('Access-Control-Allow-Method', 'POST, GET, OPTIONS')
     response.set_header('Access-Control-Allow-Headers', 'Content-Type')
 
-
-@hug.options('/owner', requires=cors_support)
-def options():
-    return
-
-@hug.options('/pet', requires=cors_support)
-def options():
-    return
-
-@hug.options('/document', requires=cors_support)
-def options():
-    return
-
 """
 USER ROUTES
 """
-
+@hug.options('/owner', requires=cors_support)
 @hug.post('/owner', requires=cors_support)
 def create_owner(body):
     if body.get('username', None) is None:
@@ -76,6 +63,7 @@ def create_owner(body):
     return body
 
 
+@hug.options('/owner', requires=cors_support)
 @hug.get('/owner', requires=cors_support)
 def get_owner(username: hug.types.text = None):
     # get owner from user redis database
@@ -90,6 +78,7 @@ def get_owner(username: hug.types.text = None):
 PET ROUTES
 """
 
+@hug.options('/pet', requires=cors_support)
 @hug.post('/pet', requires=cors_support)
 def create_pet(body):
     pet_uuid = get_uuid()
@@ -105,6 +94,7 @@ def create_pet(body):
     return body
 
 
+@hug.options('/pet', requires=cors_support)
 @hug.get('/pet', requires=cors_support)
 def get_pet(pet_id: hug.types.text = None):
     # get pet from user redis database
@@ -151,11 +141,13 @@ QUERIES
 """
 
 
+
+
 """
 DOCUMENTS
 """
 
-
+@hug.options('/document', requires=cors_support)
 @hug.post('/document', requires=cors_support)
 def get_document():
     test_document_path = 'docs/rabies_cert.pdf'
